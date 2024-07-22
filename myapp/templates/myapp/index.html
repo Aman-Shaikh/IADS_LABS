@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Book List</title>
+</head>
+<body>
+    <h1>List of Available Books</h1>
+    <ul>
+        {% for book in booklist %}
+            <li><a href="{% url 'myapp:detail' book.id %}">{{ book.id }}: {{ book.title }}</a></li>
+        {% endfor %}
+    </ul>
+
+    <p><a href="{% url 'myapp:about' %}">About page</a></p><!-- Namespaced URL -->
+
+    <a href="{% url 'myapp:place_order' %}">Place Order</a>
+</body>
+</html>

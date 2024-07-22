@@ -1,0 +1,11 @@
+{% extends 'myapp/base.html' %}
+
+{% block title %}
+    Feedback Result
+{% endblock %}
+
+{% block body_block %}
+    <h2>Feedback Result</h2>
+    <p>{{ message }}</p>
+    <p><a href="{% url 'myapp:feedback' %}">Back to feedback form</a></p>
+{% endblock %}

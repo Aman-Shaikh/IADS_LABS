@@ -1,0 +1,14 @@
+{% extends 'myapp/base.html' %}
+
+{% block title %}
+    Find Books
+{% endblock %}
+
+{% block body_block %}
+    <h2>Order Books</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Order Books</button>
+    </form>
+{% endblock %}

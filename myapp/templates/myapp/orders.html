@@ -1,0 +1,15 @@
+{% extends 'myapp/base.html' %}
+
+{% block body_block %}
+
+
+    <p>Orders</p>
+    {% if orderList %}
+        <ol>
+        {% for order in orderList %}
+           <li>{{ order }} has ordered 4 books </li>
+        {% endfor %}
+        </ol>
+
+    {% endif %}
+{% endblock %}
