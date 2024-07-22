@@ -9,8 +9,12 @@
 
     <body>
         <div>
-            <h1>{% block myhdg %}Hello User {% endblock %}</h1>
-            {% block body_block %}* {% endblock %}
+             {% if user.is_authenticated %}
+                <p>Welcome, {{ user.username }}! <a href="{% url 'myapp:user_logout' %}">Logout</a></p>
+                 {% block body_block %}* {% endblock %}
+            {% else %}
+                <p>You are not logged in. <a href="{% url 'myapp:user_login' %}">Login</a></p>
+            {% endif %}
         </div>
         <hr />
         <div>

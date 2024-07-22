@@ -1,19 +1,32 @@
-from django.shortcuts import render, get_object_or_404
-from django.http import HttpResponse
-from .models import Publisher, Book, Order
+from datetime import datetime
+import random
+
+from django.contrib.auth import logout, authenticate, login
+from django.contrib.auth.decorators import login_required
+from django.db.models import Avg
+from django.shortcuts import render, get_object_or_404, redirect
+from django.http import HttpResponse, HttpResponseRedirect
+from django.urls import reverse
+
+from .models import Publisher, Book, Order, Review
 from django.http import HttpResponse
 from .forms import FeedbackForm, SearchForm, OrderForm, OrderFormLab, ReviewForm
 
 
 def index(request):
-    booklist = Book.objects.all().order_by('id')[:10]
-    return render(request, 'myapp/index0.html', {'booklist': booklist})
-
-
-
-def about(request):
     books = Book.objects.all()
-    return render(request, 'myapp/about0.html', {'books': books})
+    last_login = request.session.get('last_login')
+    if last_login:
+        message = f"Your last login was on {last_login}"
+    else:
+        message = "Your last login was more than one hour ago"
+    return render(request, 'myapp/index0.html', {'booklist':books,'message': message})
+
+
+
+# def about(request):
+#     books = Book.objects.all()
+#     return render(request, 'myapp/about0.html', {'books': books})
 
 
 def detail(request, book_id):
@@ -118,3 +131,52 @@ def review(request):
     else:
         form = ReviewForm()
     return render(request, 'myapp/review.html', {'form': form})
+
+# Create your views here.
+def user_login(request):
+    if request.method == 'POST':
+        username = request.POST['username']
+        password = request.POST['password']
+        user = authenticate(username=username, password=password)
+        if user:
+            if user.is_active:
+                login(request, user)
+                request.session['last_login'] = str(datetime.now())
+                request.session.set_expiry(3600)  # Set session expiry to 1 hour
+                return HttpResponseRedirect(reverse('myapp:index'))
+            else:
+                return HttpResponse('Your account is disabled.')
+        else:
+            return HttpResponse('Invalid login details.')
+    else:
+        return render(request, 'myapp/login.html')
+
+@login_required
+def user_logout(request):
+    logout(request)
+    return HttpResponseRedirect(reverse('myapp:index'))
+
+@login_required
+def chk_reviews(request, book_id):
+    user = request.user
+    if user.groups.filter(name='Member').exists():
+        reviews = Review.objects.filter(book_id=book_id)
+        if reviews.exists():
+            avg_rating = reviews.aggregate(Avg('rating'))['rating__avg']
+            return render(request, 'myapp/chk_reviews.html', {'avg_rating': avg_rating})
+        else:
+            return render(request, 'myapp/chk_reviews.html', {'message': 'No reviews for this book.'})
+    else:
+        return render(request, 'myapp/chk_reviews.html', {'message': 'You are not a registered member!'})
+
+def about(request):
+
+
+    books = Book.objects.all()
+
+    mynum = request.COOKIES.get('lucky_num')
+    if not mynum:
+        mynum = str(random.randint(1, 100))
+    response = render(request, 'myapp/about0.html', {'books':books,'mynum': mynum})
+    response.set_cookie('lucky_num', mynum, max_age=300)  # 5 minutes
+    return response
