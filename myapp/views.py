@@ -174,9 +174,12 @@ def about(request):
 
     books = Book.objects.all()
 
-    mynum = request.COOKIES.get('lucky_num')
-    if not mynum:
-        mynum = str(random.randint(1, 100))
-    response = render(request, 'myapp/about0.html', {'books':books,'mynum': mynum})
-    response.set_cookie('lucky_num', mynum, max_age=300)  # 5 minutes
+    count = request.session.get('count', 1)
+    count += 1
+    if count > 3:
+        count = 1
+    request.session['count'] = count
+
+    response = render(request, 'myapp/about0.html', {'books':books,'mynum': count})
+
     return response
